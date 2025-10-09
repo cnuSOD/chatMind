@@ -49,7 +49,8 @@
 ```
    pip install HyperPyYAML==1.2.2 modelscope==1.15.0 onnxruntime==1.19.2 openai-whisper==20231117 importlib_resources==6.4.5 sounddevice==0.5.1 matcha-tts==0.0.7.0
 
-   可执行验证：
+   可执行验证：最终执行如果用云端大模型，可以省略安装cuda，然后用以下命令设置api
+   set DASHSCOPE_API_KEY=你的api-key
     python 15_SenceVoice_QWen2.5_cosyVoice.py
 ```
 
