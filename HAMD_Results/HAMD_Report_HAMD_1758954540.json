@@ -1,0 +1,134 @@
+{
+  "evaluation_id": "HAMD_1758954540",
+  "total_score": 22,
+  "max_score": 64,
+  "severity_level": {
+    "level": "中度抑郁",
+    "description": "有中度抑郁症状，建议寻求专业帮助",
+    "color": "orange",
+    "score_range": "22/64"
+  },
+  "detailed_scores": {
+    "1": {
+      "score": 2,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "明确情绪低落，但仍可进行日常活动"
+    },
+    "2": {
+      "score": 4,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "有罪恶妄想"
+    },
+    "3": {
+      "score": 2,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "有明确的自杀念头，偶尔考虑实施"
+    },
+    "4": {
+      "score": 3,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "严重失眠，影响白天功能"
+    },
+    "5": {
+      "score": 1,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "偶尔食欲减退，能自行恢复"
+    },
+    "6": {
+      "score": 1,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "偶尔兴趣减退，能维持活动"
+    },
+    "7": {
+      "score": 0,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "体重保持正常"
+    },
+    "8": {
+      "score": 1,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "偶尔有轻微迟缓，但能自行调整"
+    },
+    "9": {
+      "score": 3,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "焦虑明显，难以控制"
+    },
+    "10": {
+      "score": 1,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "偶尔自我贬低，但能自我调节"
+    },
+    "11": {
+      "score": 1,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "偶尔感到情感冷漠，能恢复"
+    },
+    "12": {
+      "score": 0,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "性兴趣正常"
+    },
+    "13": {
+      "score": 2,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "经常感到疲劳，影响日常活动"
+    },
+    "14": {
+      "score": 1,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "偶尔缺乏积极性，但能坚持"
+    },
+    "15": {
+      "score": 0,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "感知正常"
+    },
+    "16": {
+      "score": 0,
+      "analysis": "基于规则评分",
+      "scoring_criteria": "无其他症状"
+    }
+  },
+  "category_analysis": {
+    "核心症状": {
+      "score": 7,
+      "max_score": 12,
+      "percentage": 58.3,
+      "severity": "中度"
+    },
+    "认知症状": {
+      "score": 1,
+      "max_score": 8,
+      "percentage": 12.5,
+      "severity": "正常"
+    },
+    "生理症状": {
+      "score": 7,
+      "max_score": 20,
+      "percentage": 35.0,
+      "severity": "轻度"
+    },
+    "心理症状": {
+      "score": 7,
+      "max_score": 20,
+      "percentage": 35.0,
+      "severity": "轻度"
+    },
+    "其他症状": {
+      "score": 0,
+      "max_score": 4,
+      "percentage": 0.0,
+      "severity": "正常"
+    }
+  },
+  "recommendations": [
+    "建议尽快寻求专业心理咨询或治疗。",
+    "可以考虑心理治疗，如认知行为疗法。",
+    "保持与家人朋友的联系，寻求社会支持。"
+  ],
+  "evaluation_time": {
+    "start_time": "2025-09-27 14:29:00",
+    "duration_minutes": 0.0
+  }
+}
