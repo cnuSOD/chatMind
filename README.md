@@ -50,7 +50,7 @@
    pip install HyperPyYAML==1.2.2 modelscope==1.15.0 onnxruntime==1.19.2 openai-whisper==20231117 importlib_resources==6.4.5 sounddevice==0.5.1 matcha-tts==0.0.7.0
 
    可执行验证：
-    python 10_SenceVoice_QWen2.5_cosyVoice.py
+    python 15_SenceVoice_QWen2.5_cosyVoice.py
 ```
 
 # :sparkles: 241130-updata
@@ -62,7 +62,7 @@
 
 ## 新增自由定义唤醒词功能
 
-使用SenceVoice的语音识别能力实现，将语音识别的汉字转为拼音进行匹配。将唤醒词/指令词设置为中文对应拼音，可自由定制。15.0_SenceVoice_kws_CAM++.py中默认为'ni hao xiao qian'，15.1_SenceVoice_kws_CAM++.py中默认为'zhan qi lai'[暗影君王实在太cool辣]
+使用SenceVoice的语音识别能力实现，将语音识别的汉字转为拼音进行匹配。将唤醒词/指令词设置为中文对应拼音，可自由定制。15.0_SenceVoice_kws_CAM++.py中默认为'ni hao xiao qian'，15.1_SenceVoice_kws_CAM++.py中默认为'zhan qi lai'
 
 ## 新增对话历史内容记忆功能
 
@@ -74,7 +74,7 @@
 
 有历史记忆：15.1_SenceVoice_kws_CAM++.py
 
-[演示demo，B站] (https://www.bilibili.com/video/BV1Q6zpYpEgv)
+
 
 Have fun! 😊
 
@@ -94,7 +94,7 @@ Have fun! 😊
 
 14_SenceVoice_QWen2VL_edgeTTS_realTime.py
 
-[演示demo，B站] (https://www.bilibili.com/video/BV1uQBCYrEYL)
+
 
 # :sparkles: 241027-语音交互大模型/SenceVoice-QWen2.5-TTS
 
