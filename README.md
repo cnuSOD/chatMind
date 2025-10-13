@@ -51,7 +51,7 @@
 
    可执行验证：最终执行如果用云端大模型，可以省略安装cuda，然后用以下命令设置api
    set DASHSCOPE_API_KEY=你的api-key
-    python 15_SenceVoice_QWen2.5_cosyVoice.py
+    python 15.0_SenceVoice_kws_CAM++.py
 ```
 
 # :sparkles: 241130-updata

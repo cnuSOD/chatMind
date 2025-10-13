@@ -1053,10 +1053,8 @@ class HAMDEvaluator:
         self.scores = {}
         self.detailed_answers = {}
         
-        print(f"=== 哈密尔顿抑郁量表（HAMD-17）评估开始 ===")
-        print(f"评估ID: {self.evaluation_id}")
-        print(f"开始时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.evaluation_start_time))}")
-        print("=" * 50)
+        # 控制台保留简要日志
+        print(f"[HAMD] Start, ID={self.evaluation_id}, Time={time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.evaluation_start_time))}")
         
         return self.evaluation_id
     
@@ -1072,9 +1070,19 @@ class HAMDEvaluator:
         if not current_q:
             return ""
         
-        prompt = f"现在进行第{self.current_question_index + 1}个问题，关于{current_q['title']}。\n"
-        prompt += f"{current_q['question']}\n"
-        prompt += "请您详细描述一下您的情况。"
+        # 多样化问法：随机挑选更自然的提示
+        variants = [
+            f"{current_q['question']}",
+            f"想了解一下：{current_q['question']}",
+            f"可以聊聊：{current_q['question']}",
+            f"这方面的情况是：{current_q['question']}"
+        ]
+        try:
+            import random as _random
+            chosen = _random.choice(variants)
+        except Exception:
+            chosen = variants[0]
+        prompt = chosen + "\n请结合最近一周的感受简单说说。"
         
         return prompt
     
