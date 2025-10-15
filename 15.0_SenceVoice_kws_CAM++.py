@@ -526,7 +526,7 @@ def start_hamd_evaluation():
     hamd_evaluation_active = True
     evaluation_id = hamd_evaluator.start_evaluation()
     
-    intro_text = "好的，我将为您进行哈密尔顿抑郁量表评估。这个评估多个问题，用于了解您的心理健康状况。请如实回答每个问题，这将有助于更好地了解您的情况。"
+    intro_text = "好的，我将为您进行哈密尔顿抑郁量表评估。这个评估包含多个问题，用于了解您的心理健康状况。请如实回答每个问题，这将有助于更好地了解您的情况。"
     system_introduction(intro_text)
     
     # 开始第一个问题
