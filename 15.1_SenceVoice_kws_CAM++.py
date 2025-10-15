@@ -21,7 +21,14 @@ import langid
 from langdetect import detect
 import re
 from pypinyin import pinyin, Style
-from modelscope.pipelines import pipeline
+from hamd_evaluator import HAMDEvaluator
+from http import HTTPStatus
+try:
+    import dashscope
+    from dashscope import Generation
+except Exception:
+    dashscope = None
+    Generation = None
 
 # --- 配置huggingFace国内镜像 ---
 import os
@@ -34,6 +41,7 @@ CHUNK = 1024              # 音频块大小
 VAD_MODE = 3              # VAD 模式 (0-3, 数字越大越敏感)
 OUTPUT_DIR = "./output"   # 输出目录
 NO_SPEECH_THRESHOLD = 1   # 无效语音阈值，单位：秒
+ANSWER_PAUSE_SECONDS = 2.5  # 回答阶段允许的停顿时长（HAMD模式）
 folder_path = "./Test_QWen2_VL/"
 audio_file_count = 0
 audio_file_count_tmp = 0
@@ -60,11 +68,18 @@ last_vad_end_time = 0  # 上次保存的 VAD 有效段结束时间
 set_KWS = "zhan qi lai"
 flag_KWS = 0
 
-flag_KWS_used = 1
-flag_sv_used = 1
+flag_KWS_used = 0
+flag_sv_used = 0
 
-flag_sv_enroll = 0
-thred_sv = 0.35
+thred_sv = 0.35  # 已不使用（兼容保留）
+
+# HAMD 模式开关
+hamd_mode = True
+
+# -------- HAMD 全局状态 --------
+hamd_evaluator = None
+hamd_started = False
+hamd_waiting_for_answer = False
 
 # 初始化 WebRTC VAD
 vad = webrtcvad.Vad()
@@ -124,8 +139,8 @@ def audio_recorder():
             
             audio_buffer = []  # 清空缓冲区
         
-        # 检查无效语音时间
-        if time.time() - last_active_time > NO_SPEECH_THRESHOLD:
+        # 检查无效语音时间（根据模式动态阈值）
+        if time.time() - last_active_time > get_silence_threshold():
             # 检查是否需要保存
             if segments_to_save and segments_to_save[-1][1] > last_vad_end_time:
                 save_audio_video()
@@ -188,11 +203,8 @@ def save_audio_video():
     global flag_sv_enroll
     global set_SV_enroll
 
-    if flag_sv_enroll:
-        audio_output_path = f"{set_SV_enroll}/enroll_0.wav"
-    else:
-        audio_file_count += 1
-        audio_output_path = f"{OUTPUT_DIR}/audio_{audio_file_count}.wav"
+    audio_file_count += 1
+    audio_output_path = f"{OUTPUT_DIR}/audio_{audio_file_count}.wav"
     # audio_output_path = f"{OUTPUT_DIR}/audio_0.wav"
 
     if not segments_to_save:
@@ -231,15 +243,9 @@ def save_audio_video():
 
     # Inference()
 
-    if flag_sv_enroll:
-        text = "声纹注册完成！现在只有你可以命令我啦！"
-        print(text)
-        flag_sv_enroll = 0
-        system_introduction(text)
-    else:
     # 使用线程执行推理
-        inference_thread = threading.Thread(target=Inference, args=(audio_output_path,))
-        inference_thread.start()
+    inference_thread = threading.Thread(target=Inference, args=(audio_output_path,))
+    inference_thread.start()
         
         # 记录保存的区间
         saved_intervals.append((start_time, end_time))
@@ -292,13 +298,8 @@ def is_folder_empty(folder_path):
 model_dir = r"iic/SenseVoiceSmall"
 model_senceVoice = AutoModel( model=model_dir, trust_remote_code=True, )
 
-# -------- CAM++声纹识别 -- 模型加载 --------
-set_SV_enroll = r'.\SpeakerVerification_DIR\enroll_wav\\'
-sv_pipeline = pipeline(
-    task='speaker-verification',
-    model='damo/speech_campplus_sv_zh-cn_16k-common',
-    model_revision='v1.0.0'
-)
+# 已移除声纹识别依赖与调用
+set_SV_enroll = r'.\SpeakerVerification_DIR\enroll_wav\\'  # 兼容遗留目录变量，不再使用
 
 # --------- QWen2.5大语言模型 ---------------
 # model_name = r"E:\2_PYTHON\Project\GPT\QWen\Qwen2.5-0.5B-Instruct"
@@ -346,6 +347,69 @@ def system_introduction(text):
     asyncio.run(amain(text, used_speaker, os.path.join(folder_path,f"sft_tmp_{audio_file_count}.mp3")))
     play_audio(f'{folder_path}/sft_tmp_{audio_file_count}.mp3')
 
+
+def qwen_chat_adapter(messages, temperature=0.3, max_new_tokens=256):
+    """
+    优先使用 DashScope 云端千问；若不可用则回退到本地 Qwen。
+    messages: List[{"role": str, "content": str}]
+    """
+    # 云端优先
+    if dashscope is not None and Generation is not None:
+        api_key = os.environ.get("DASHSCOPE_API_KEY", "")
+        if api_key:
+            dashscope.api_key = api_key
+            try:
+                result = Generation.call(
+                    model="qwen-plus",
+                    messages=messages,
+                    temperature=temperature,
+                    result_format='message',
+                    max_tokens=max_new_tokens,
+                )
+                if getattr(result, 'status_code', None) == HTTPStatus.OK:
+                    return result.output.choices[0]['message']['content']
+            except Exception as e:
+                print("DashScope 调用异常，回退本地：", e)
+        else:
+            print("未设置 DASHSCOPE_API_KEY，使用本地模型。")
+
+    # 本地回退
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True,
+    )
+    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+    generated_ids = model.generate(
+        **model_inputs,
+        max_new_tokens=max_new_tokens,
+        temperature=temperature,
+        do_sample=True,
+    )
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
+    output_text = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    return output_text
+
+
+def hamd_speak(text):
+    global audio_file_count
+    audio_file_count += 1
+    used_speaker = "zh-CN-XiaoyiNeural"
+    asyncio.run(amain(text, used_speaker, os.path.join(folder_path,f"hamd_{audio_file_count}.mp3")))
+    play_audio(f'{folder_path}/hamd_{audio_file_count}.mp3')
+
+
+def get_silence_threshold():
+    """
+    在 HAMD 提问-回答阶段：提问播放后，等待的用户回答允许更长停顿；
+    在其他阶段或未开始时，使用基础阈值。
+    """
+    if hamd_mode and hamd_waiting_for_answer:
+        return ANSWER_PAUSE_SECONDS
+    return NO_SPEECH_THRESHOLD
+
 def Inference(TEMP_AUDIO_FILE=f"{OUTPUT_DIR}/audio_0.wav"):
     '''
     1. 使用senceVoice做asr，转换为拼音，检测唤醒词
@@ -365,109 +429,84 @@ def Inference(TEMP_AUDIO_FILE=f"{OUTPUT_DIR}/audio_0.wav"):
     global flag_KWS
     global flag_KWS_used
     
-    os.makedirs(set_SV_enroll, exist_ok=True)
-    # --- 如果开启声纹识别，且声纹文件夹为空，则开始声纹注册。设定注册语音有效长度需大于3秒
-    if flag_sv_used and is_folder_empty(set_SV_enroll):
-        text = f"无声纹注册文件！请先注册声纹，需大于三秒哦~"
-        print(text)
-        system_introduction(text)
-        flag_sv_enroll = 1
-    
-    else:
-        # -------- SenceVoice 推理 ---------
-        input_file = (TEMP_AUDIO_FILE)
-        res = model_senceVoice.generate(
-            input=input_file,
-            cache={},
-            language="auto", # "zn", "en", "yue", "ja", "ko", "nospeech"
-            use_itn=False,
-        )
-        prompt = res[0]['text'].split(">")[-1]
-        prompt_pinyin = extract_chinese_and_convert_to_pinyin(prompt)
-        print(prompt, prompt_pinyin)
+    # 在 HAMD 模式下：把每段有效语音作为一题的回答处理
+    if hamd_mode:
+        global hamd_evaluator, hamd_started, hamd_waiting_for_answer
 
-        # --- 判断是否启动KWS
-        if not flag_KWS_used:
-            flag_KWS = 1
-        if not flag_KWS:
-            if set_KWS in prompt_pinyin:
-                flag_KWS = 1
-        
-        # --- KWS成功，或不设置KWS
-        if flag_KWS:
-            sv_score = sv_pipeline([os.path.join(set_SV_enroll, "enroll_0.wav"), TEMP_AUDIO_FILE], thr=thred_sv)
-            print(sv_score)
-            sv_result = sv_score['text']
-            if sv_result == "yes":
+        # 初始化并开始评估（只执行一次）
+        if not hamd_started:
+            hamd_evaluator = HAMDEvaluator(
+                questions_file="hamd_questions.json",
+                model_name=None,
+                output_dir="./HAMD_Results/",
+                chat_fn=qwen_chat_adapter
+            )
+            hamd_evaluator.start_evaluation()
+            hamd_started = True
+            hamd_waiting_for_answer = False
+            # 播报开场与第一题
+            intro = "现在开始进行哈密尔顿抑郁量表评估，我会逐一提问，请如实作答。"
+            print(intro)
+            hamd_speak(intro)
+            current_q = hamd_evaluator.get_current_question()
+            if current_q:
+                speak_text = f"第{current_q['index']}题。" + hamd_evaluator.get_question_prompt()
+                print("Q:", speak_text)
+                hamd_speak(speak_text)
+                hamd_waiting_for_answer = True
+            return
 
-                # --- 读取历史对话 ---
-                context = memory.get_context()
-                
-                # prompt_tmp = res[0]['text'].split(">")[-1] + "，回答简短一些，保持50字以内！"
-                prompt_tmp = res[0]['text'].split(">")[-1]
-                prompt = f"{context}\nUser:{prompt_tmp}\n"
+        # 如果当前在等待回答，则将此音频识别为回答
+        if hamd_waiting_for_answer:
+            input_file = (TEMP_AUDIO_FILE)
+            res = model_senceVoice.generate(
+                input=input_file,
+                cache={},
+                language="auto",
+                use_itn=False,
+            )
+            user_answer = res[0]['text'].split(">")[-1]
+            print("User A:", user_answer)
 
-                print("History:", context)
-                print("ASR OUT:", prompt)
-                # ---------SenceVoice --end----------
-                # -------- 模型推理阶段，将语音识别结果作为大模型Prompt ------
-                messages = [
-                    {"role": "system", "content": "你叫小千，是一个18岁的女大学生，性格活泼开朗，说话俏皮简洁，回答问题不会超过50字。"},
-                    {"role": "user", "content": prompt},
-                ]
-                text = tokenizer.apply_chat_template(
-                    messages,
-                    tokenize=False,
-                    add_generation_prompt=True,
-                )
-                model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
+            # 处理答案并评分
+            result = hamd_evaluator.process_answer(user_answer)
+            hamd_waiting_for_answer = False
 
-                generated_ids = model.generate(
-                    **model_inputs,
-                    max_new_tokens=512,
-                )
-                generated_ids = [
-                    output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
-                ]
+            # 若完成则生成报告
+            if result.get("is_complete"):
+                report = hamd_evaluator.generate_report()
+                summary = f"评估完成。总分{report['total_score']}/{report['max_score']}，严重程度：{report['severity_level']['level']}。"
+                print(summary)
+                hamd_speak(summary)
+                # 简要分项播报
+                try:
+                    cats = report.get('category_analysis', {})
+                    brief = []
+                    for k, v in cats.items():
+                        brief.append(f"{k}{v['score']}/{v['max_score']}")
+                    if brief:
+                        hamd_speak("分项：" + "，".join(brief))
+                except Exception:
+                    pass
+                return
 
-                output_text = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+            # 未完成则播报下一题
+            current_q = hamd_evaluator.get_current_question()
+            if current_q:
+                speak_text = f"第{current_q['index']}题。" + hamd_evaluator.get_question_prompt()
+                print("Q:", speak_text)
+                hamd_speak(speak_text)
+                hamd_waiting_for_answer = True
+            return
 
-                print("answer", output_text)
-
-                # -------- 更新记忆库 -----
-                memory.add_to_history(prompt_tmp, output_text)
-
-                # 输入文本
-                text = output_text
-                # 语种识别 -- langid
-                language, confidence = langid.classify(text)
-                # 语种识别 -- langdetect 
-                # language = detect(text).split("-")[0]
-
-                language_speaker = {
-                "ja" : "ja-JP-NanamiNeural",            # ok
-                "fr" : "fr-FR-DeniseNeural",            # ok
-                "es" : "ca-ES-JoanaNeural",             # ok
-                "de" : "de-DE-KatjaNeural",             # ok
-                "zh" : "zh-CN-XiaoyiNeural",            # ok
-                "en" : "en-US-AnaNeural",               # ok
-                }
-
-                if language not in language_speaker.keys():
-                    used_speaker = "zh-CN-XiaoyiNeural"
-                else:
-                    used_speaker = language_speaker[language]
-                    print("检测到语种：", language, "使用音色：", language_speaker[language])
-
-                asyncio.run(amain(text, used_speaker, os.path.join(folder_path,f"sft_{audio_file_count}.mp3")))
-                play_audio(f'{folder_path}/sft_{audio_file_count}.mp3')
-            else:
-                text = "很抱歉，声纹验证失败，我无法为您服务"
-                print(text)
-                # system_introduction(text)
-        else:
-            text = "很抱歉，唤醒词错误，请说出正确的唤醒词哦"
-            system_introduction(text)
+        # 如果不在等待回答，则重复当前题
+        current_q = hamd_evaluator.get_current_question()
+        if current_q:
+            speak_text = f"第{current_q['index']}题。" + hamd_evaluator.get_question_prompt()
+            print("Q:", speak_text)
+            hamd_speak(speak_text)
+            hamd_waiting_for_answer = True
+        return
 
 # 主函数
 if __name__ == "__main__":
@@ -479,16 +518,19 @@ if __name__ == "__main__":
         audio_thread.start()
         # video_thread.start()
 
-        flag_info = f'{flag_sv_used}-{flag_KWS_used}'
-        dict_flag_info = {
-            "1-1": "您已开启声纹识别和关键词唤醒，",
-            "0-1":"您已开启关键词唤醒",
-            "1-0":"您已开启声纹识别",
-            "0-0":"",
-        }
-        if flag_sv_used or flag_KWS_used:
-            text = dict_flag_info[flag_info]
-            system_introduction(text)
+        if hamd_mode:
+            system_introduction("将进行哈密尔顿抑郁量表语音评估，稍后请用简短自然语言回答问题。")
+        else:
+            flag_info = f'{flag_sv_used}-{flag_KWS_used}'
+            dict_flag_info = {
+                "1-1": "您已开启声纹识别和关键词唤醒，",
+                "0-1":"您已开启关键词唤醒",
+                "1-0":"您已开启声纹识别",
+                "0-0":"",
+            }
+            if flag_sv_used or flag_KWS_used:
+                text = dict_flag_info[flag_info]
+                system_introduction(text)
 
         print("按 Ctrl+C 停止录制")
         while True:

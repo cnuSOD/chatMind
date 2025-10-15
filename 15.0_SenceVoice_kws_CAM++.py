@@ -75,6 +75,8 @@ VOICE_LOCK_ENABLED = True  # True 则所有播报固定用 DEFAULT_TTS_VOICE
 hamd_evaluator = None
 hamd_evaluation_active = False
 hamd_trigger_keywords = ["抑郁评估", "心理测试", "抑郁测试", "心理评估", "开始评估", "hamd", "抑郁量表"]
+hamd_waiting_for_answer = False  # 标记是否正在等待用户回答HAMD问题
+ANSWER_PAUSE_SECONDS = 3.5  # 等待用户回答时的停顿时间（秒）
 
 # 初始化 WebRTC VAD
 vad = webrtcvad.Vad()
@@ -134,8 +136,9 @@ def audio_recorder():
             
             audio_buffer = []  # 清空缓冲区
         
-        # 检查无效语音时间
-        if time.time() - last_active_time > NO_SPEECH_THRESHOLD:
+        # 检查无效语音时间（动态阈值：评估模式下等待时间更长）
+        threshold = ANSWER_PAUSE_SECONDS if (hamd_waiting_for_answer) else NO_SPEECH_THRESHOLD
+        if time.time() - last_active_time > threshold:
             # 检查是否需要保存
             if segments_to_save and segments_to_save[-1][1] > last_vad_end_time:
                 save_audio_video()
@@ -265,8 +268,10 @@ def play_audio(file_path):
         pygame.mixer.music.load(file_path)
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
-            time.sleep(1)  # 等待音频播放结束
+            time.sleep(0.1)  # 等待音频播放结束
         print("播放完成！")
+        # 播放完成后额外等待0.5秒，确保音频设备完全释放，避免捕获残余音频
+        time.sleep(0.5)
     except Exception as e:
         print(f"播放失败: {e}")
     finally:
@@ -374,14 +379,16 @@ class ChatMemory:
 memory = ChatMemory(max_length=512)
 
 def system_introduction(text):
-    global audio_file_count
     global folder_path
     text = text
     print("LLM output:", text)
     # 统一使用锁定音色
     used_speaker = DEFAULT_TTS_VOICE if VOICE_LOCK_ENABLED else "zh-CN-YunxiNeural"
-    asyncio.run(amain(text, used_speaker, os.path.join(folder_path,f"sft_tmp_{audio_file_count}.mp3")))
-    play_audio(f'{folder_path}/sft_tmp_{audio_file_count}.mp3')
+    # 使用时间戳确保文件名唯一
+    timestamp = int(time.time() * 1000)
+    tts_file = os.path.join(folder_path, f"sft_tmp_{timestamp}.mp3")
+    asyncio.run(amain(text, used_speaker, tts_file))
+    play_audio(tts_file)
 
 def check_hamd_trigger(text):
     """检查是否触发HAMD评估"""
@@ -412,16 +419,21 @@ def check_hamd_trigger(text):
     return has_evaluation and has_depression
 
 def classify_hamd_intent(text):
-    """使用LLM识别评估控制意图。返回字典: {intent, answer_text?, target_index?}
+    """使用LLM识别评估控制意图。返回字典: {intent, target_index?}
     intent 取值：answer | repeat | previous | next | skip | stop | start | restart | resume | switch_topic | jump
     """
     schema = (
-        "你是心理评估会话的意图分类器。判断用户说的话是以下哪类: "
-        "answer(回答问题)、repeat(重复当前题)、previous(上一题)、"
-        "next(下一题)、skip(跳过此题)、stop(结束评估)、start(开始评估)、"
-        "restart(重新开始评估)、resume(继续进行/恢复评估)、"
-        "switch_topic(切换到日常聊天)、jump(跳转到指定题号，需字段target_index为整数)。请只用JSON返回，如: "
-        "{\"intent\":\"answer\",\"answer_text\":\"...\"} 或 {\"intent\":\"previous\"} 或 {\"intent\":\"jump\",\"target_index\":1}."
+        "你是心理评估意图分类器。当前用户正在进行心理评估问答。判断用户说的话属于哪类意图:\n"
+        "- answer: 回答评估问题（描述症状、感受、情况等，这是默认意图）\n"
+        "- repeat: 要求重复当前问题\n"
+        "- previous: 返回上一题\n"
+        "- next/skip: 跳过当前题\n"
+        "- stop: 明确要求结束/停止评估\n"
+        "- jump: 跳转到指定题号\n"
+        "- switch_topic: 明确要求暂停评估去聊别的话题（必须有明确的切换意图）\n\n"
+        "注意：只有当用户明确表示「不想做评估了」「我们聊点别的」时才是switch_topic。\n"
+        "用户描述自己的症状、心情、状况等都属于answer，即使内容很长或很详细。\n\n"
+        "只返回JSON: {\"intent\":\"answer\"} 或 {\"intent\":\"stop\"} 等"
     )
     messages = [
         {"role": "system", "content": schema},
@@ -493,10 +505,14 @@ def classify_hamd_intent(text):
             return {"intent": "stop"}
         if any(k in t for k in ["开始评估", "做个评估", "心理评估", "start evaluation", "start"]):
             return {"intent": "start"}
+        # switch_topic需要非常明确的切换意图（避免误判用户的正常回答）
+        if any(k in t for k in ["不想做评估", "我们聊点别的", "暂停评估", "先不做了", "换个话题", "聊聊天", 
+                                 "bu xiang zuo ping gu", "zan ting ping gu"]):
+            return {"intent": "switch_topic"}
     except Exception:
         pass
-    # 默认视为回答
-    return {"intent": "answer", "answer_text": text}
+    # 默认视为回答（不返回answer_text，外部会直接使用原始输入）
+    return {"intent": "answer"}
 
 def start_hamd_evaluation():
     """开始HAMD评估"""
@@ -519,27 +535,68 @@ def start_hamd_evaluation():
 
 def ask_next_hamd_question():
     """询问下一个HAMD问题"""
-    global hamd_evaluator
+    global hamd_evaluator, hamd_waiting_for_answer
     
     if not hamd_evaluator or hamd_evaluator.is_evaluation_complete():
+        hamd_waiting_for_answer = False
         return False
     
     current_question = hamd_evaluator.get_current_question()
     if current_question:
         question_prompt = hamd_evaluator.get_question_prompt()
+        hamd_waiting_for_answer = True  # 设置标志：正在等待用户回答
         system_introduction(question_prompt)
         return True
+    hamd_waiting_for_answer = False
     return False
 
 def process_hamd_answer(user_answer):
     """处理HAMD评估回答"""
-    global hamd_evaluator, hamd_evaluation_active
+    global hamd_evaluator, hamd_evaluation_active, hamd_waiting_for_answer
+    
+    # 清除等待标志
+    hamd_waiting_for_answer = False
     
     if not hamd_evaluator:
         return False
     
     # 处理当前回答
     result = hamd_evaluator.process_answer(user_answer)
+    
+    # 在评分之后，用大模型生成一句安慰/共情回应
+    try:
+        sys_prompt = (
+            "你是心理评估助手。请对用户的回答给出一句简短的共情性回应，"
+            "使用温暖、支持的语气，不超过25个字；"
+            "不要提问；不要给建议；不要复述评分；不要提及分数；"
+            "避免医学诊断或指导；只用中文。"
+        )
+        messages = [
+            {"role": "system", "content": sys_prompt},
+            {"role": "user", "content": f"用户刚才说：{user_answer}"},
+        ]
+        comfort = chat_api(messages, temperature=0.7, max_tokens=50)
+        
+        # 清洗生成内容
+        if comfort and isinstance(comfort, str):
+            comfort = comfort.replace("\n", "").strip()
+            # 如果包含问号或疑问句，使用默认回应
+            if ("?" in comfort) or ("？" in comfort) or comfort.endswith("吗"):
+                comfort = "我理解，这很不容易。"
+            # 限制长度
+            if len(comfort) > 30:
+                comfort = comfort[:30]
+        else:
+            comfort = "我理解，这很不容易。"
+        
+        system_introduction(comfort)
+    except Exception as e:
+        print(f"生成共情回应失败: {e}")
+        # 失败时使用默认回应
+        try:
+            system_introduction("我理解，这很不容易。")
+        except Exception:
+            pass
     
     if result.get("is_complete", False):
         # 评估完成，生成报告
@@ -646,6 +703,7 @@ def Inference(TEMP_AUDIO_FILE=f"{OUTPUT_DIR}/audio_0.wav"):
                     print(f"HAMD评估模式 - 用户说: {prompt_tmp}")
                     intent_obj = classify_hamd_intent(prompt_tmp)
                     intent = str(intent_obj.get("intent", "answer")).lower()
+                    print(f"[调试] 意图分类结果: {intent_obj}")
                     handled_in_eval = True
                     # 精确跳题（到第X题）
                     if intent == "jump":
@@ -689,17 +747,17 @@ def Inference(TEMP_AUDIO_FILE=f"{OUTPUT_DIR}/audio_0.wav"):
                         # 结束评估
                         system_introduction("好的，已结束本次评估。若需要，随时可以让我重新开始。")
                         hamd_evaluation_active = False
+                        return  # 结束评估后直接返回
                     elif intent == "switch_topic":
                         # 切换到日常对话
-                        system_introduction("好的，我们先暂停评估，继续日常对话。")
+                        system_introduction("好的，我们先暂停评估，有需要随时叫我继续。")
                         hamd_evaluation_active = False
-                        handled_in_eval = False
+                        return  # 切换话题后直接返回，不执行后续流程
                     else:
-                        # 按回答处理
-                        answer_text = intent_obj.get("answer_text", prompt_tmp)
-                        process_hamd_answer(answer_text)
-                    if handled_in_eval:
-                        return  # 仍在评估流中则直接返回
+                        # 按回答处理 - 直接使用原始用户输入，不使用LLM可能改写的answer_text
+                        process_hamd_answer(prompt_tmp)
+                    # 评估流程处理完毕，直接返回
+                    return
                     
                 # --- 检查是否触发HAMD评估（显式关键词立即开始） ---
                 if check_hamd_trigger(prompt_tmp):
@@ -756,8 +814,11 @@ def Inference(TEMP_AUDIO_FILE=f"{OUTPUT_DIR}/audio_0.wav"):
                         used_speaker = language_speaker[language]
                         print("检测到语种：", language, "使用音色：", language_speaker[language])
 
-                asyncio.run(amain(text, used_speaker, os.path.join(folder_path,f"sft_{audio_file_count}.mp3")))
-                play_audio(f'{folder_path}/sft_{audio_file_count}.mp3')
+                # 使用时间戳确保文件名唯一
+                timestamp = int(time.time() * 1000)
+                tts_file = os.path.join(folder_path, f"sft_{timestamp}.mp3")
+                asyncio.run(amain(text, used_speaker, tts_file))
+                play_audio(tts_file)
             else:
                 text = "很抱歉，声纹验证失败，我无法为您服务"
                 print(text)

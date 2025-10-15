@@ -1,0 +1,134 @@
+{
+  "evaluation_id": "HAMD_1760454303",
+  "total_score": 30,
+  "max_score": 64,
+  "severity_level": {
+    "level": "重度抑郁",
+    "description": "有重度抑郁症状，强烈建议立即寻求专业医疗帮助",
+    "color": "red",
+    "score_range": "30/64"
+  },
+  "detailed_scores": {
+    "1": {
+      "score": 3,
+      "analysis": "评分：3分，理由：情绪持续低落，失去兴趣，表达绝望，影响日常状态。",
+      "scoring_criteria": "持续情绪低落，难以维持日常功能"
+    },
+    "2": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到“经常自责”且“都是我的错”，表明内疚感较强且频率较高，但未表现出持续自我贬低或罪恶妄想。",
+      "scoring_criteria": "经常内疚，自责程度较强"
+    },
+    "3": {
+      "score": 1,
+      "analysis": "评分：1分，理由：有偶尔的自杀念头，但没有实施计划。",
+      "scoring_criteria": "偶尔有自杀念头，但没有实施计划"
+    },
+    "4": {
+      "score": 3,
+      "analysis": "评分：3分，理由：描述严重失眠且影响睡眠连续性，夜间醒来后难以入睡，表明对白天功能可能有明显影响。",
+      "scoring_criteria": "严重失眠，影响白天功能"
+    },
+    "5": {
+      "score": 1,
+      "analysis": "评分：1分，理由：食欲偶尔减退，能自行恢复，未影响饮食。",
+      "scoring_criteria": "偶尔食欲减退，能自行恢复"
+    },
+    "6": {
+      "score": 1,
+      "analysis": "评分：1分，理由：回答表明偶尔兴趣减退，但未说明完全丧失或影响日常活动。",
+      "scoring_criteria": "偶尔兴趣减退，能维持活动"
+    },
+    "7": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示体重无明显变化，符合正常范围。",
+      "scoring_criteria": "体重保持正常"
+    },
+    "8": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户明确表示“做事比以前慢很多”且“没有精神”，表明存在明显迟缓和精力不足，影响日常活动。",
+      "scoring_criteria": "明显迟缓，活动需要别人帮助"
+    },
+    "9": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户明确提到“经常感到焦虑和烦躁控制不住”，表明焦虑明显且难以控制，符合3分标准。",
+      "scoring_criteria": "焦虑明显，难以控制"
+    },
+    "10": {
+      "score": 3,
+      "analysis": "评分：3分，理由：表达极度自我贬低，情感负面且影响情绪。",
+      "scoring_criteria": "极度自我贬低，产生负面行为"
+    },
+    "11": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户表达常感情感平淡，与他人疏远。",
+      "scoring_criteria": "常感情感平淡，与他人疏远"
+    },
+    "12": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户明确表示性兴趣下降，但未提及完全丧失或显著抑郁症状，表明存在明显减退但可能影响亲密关系。",
+      "scoring_criteria": "性兴趣明显减退，影响亲密关系"
+    },
+    "13": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到“经常感到很累没有力气”，表明疲劳频率较高，影响日常活动。",
+      "scoring_criteria": "经常感到疲劳，影响日常活动"
+    },
+    "14": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户明确表示缺乏积极性，无法主动做事，需要他人推动，符合“没有积极性，无法主动做事”的描述。",
+      "scoring_criteria": "没有积极性，无法主动做事"
+    },
+    "15": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户明确表示感知能力正常，未表现出任何异常或困难。",
+      "scoring_criteria": "感知正常"
+    },
+    "16": {
+      "score": 1,
+      "analysis": "评分：1分，理由：提及轻微症状但未说明影响生活。",
+      "scoring_criteria": "有轻微症状，但不影响生活"
+    }
+  },
+  "category_analysis": {
+    "核心症状": {
+      "score": 6,
+      "max_score": 12,
+      "percentage": 50.0,
+      "severity": "中度"
+    },
+    "认知症状": {
+      "score": 3,
+      "max_score": 8,
+      "percentage": 37.5,
+      "severity": "轻度"
+    },
+    "生理症状": {
+      "score": 9,
+      "max_score": 20,
+      "percentage": 45.0,
+      "severity": "轻度"
+    },
+    "心理症状": {
+      "score": 11,
+      "max_score": 20,
+      "percentage": 55.0,
+      "severity": "中度"
+    },
+    "其他症状": {
+      "score": 1,
+      "max_score": 4,
+      "percentage": 25.0,
+      "severity": "轻度"
+    }
+  },
+  "recommendations": [
+    "强烈建议立即寻求专业医疗帮助。",
+    "可能需要药物治疗结合心理治疗。",
+    "请不要独自承担，及时联系医生或心理健康专家。"
+  ],
+  "evaluation_time": {
+    "start_time": "2025-10-14 23:05:03",
+    "duration_minutes": 7.0
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "evaluation_id": "HAMD_1760540495",
+  "total_score": 20,
+  "max_score": 64,
+  "severity_level": {
+    "level": "中度抑郁",
+    "description": "有中度抑郁症状，建议寻求专业帮助",
+    "color": "orange",
+    "score_range": "20/64"
+  },
+  "detailed_scores": {
+    "1": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户提到心情低落、悲伤、失去兴趣和绝望，符合持续情绪低落难以维持日常功能的表现。",
+      "scoring_criteria": "持续情绪低落，难以维持日常功能"
+    },
+    "2": {
+      "score": 0,
+      "analysis": "评分：0分，理由：未提及任何罪恶感或自责内容。",
+      "scoring_criteria": "没有罪恶感"
+    },
+    "3": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户明确表示没有自杀行为。",
+      "scoring_criteria": "无自杀念头或行为"
+    },
+    "4": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到偶尔失眠且半夜醒来后难以入睡，符合偶尔失眠能自行恢复的描述。",
+      "scoring_criteria": "偶尔失眠，能自行恢复"
+    },
+    "5": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表示食欲减退但能自行恢复。",
+      "scoring_criteria": "偶尔食欲减退，能自行恢复"
+    },
+    "6": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户表现出对日常活动的兴趣减退，因焦虑和自我否定而难以维持正常参与。",
+      "scoring_criteria": "兴趣显著减退，但仍能参加日常活动"
+    },
+    "7": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户未确认体重减轻，回答模糊且未符合任何评分标准。",
+      "scoring_criteria": "体重保持正常"
+    },
+    "8": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到“有一点感觉”且有焦虑情绪，表明存在轻微迟缓但未影响正常活动。",
+      "scoring_criteria": "偶尔有轻微迟缓，但能自行调整"
+    },
+    "9": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户描述焦虑明显且影响生活，提到压力大、痛苦和无法控制的状态。",
+      "scoring_criteria": "焦虑明显，难以控制"
+    },
+    "10": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户表现出明显自我贬低，认为自己不如他人且不适合读研，同时伴有焦虑情绪，符合极度自我贬低的表现。",
+      "scoring_criteria": "极度自我贬低，产生负面行为"
+    },
+    "11": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户表达混乱且提到被霸凌导致情感疏远，显示明显情感平淡和难以建立联系。",
+      "scoring_criteria": "情感明显平淡，难以建立联系"
+    },
+    "12": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户明确表示对男的感兴趣，性兴趣未减退。",
+      "scoring_criteria": "性兴趣正常"
+    },
+    "13": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表示偶尔感到乏力，但能恢复。",
+      "scoring_criteria": "偶尔感到疲惫，但能恢复"
+    },
+    "14": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户明确表示积极性高，符合完全有积极性的标准。",
+      "scoring_criteria": "完全有积极性，能够自发做事情"
+    },
+    "15": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示感知能力正常。",
+      "scoring_criteria": "感知正常"
+    },
+    "16": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户描述有头痛、心慌和胸闷症状，属于较明显身体症状需关注。",
+      "scoring_criteria": "有较明显症状，需关注"
+    }
+  },
+  "category_analysis": {
+    "核心症状": {
+      "score": 5,
+      "max_score": 12,
+      "percentage": 41.7,
+      "severity": "轻度"
+    },
+    "认知症状": {
+      "score": 3,
+      "max_score": 8,
+      "percentage": 37.5,
+      "severity": "轻度"
+    },
+    "生理症状": {
+      "score": 4,
+      "max_score": 20,
+      "percentage": 20.0,
+      "severity": "正常"
+    },
+    "心理症状": {
+      "score": 6,
+      "max_score": 20,
+      "percentage": 30.0,
+      "severity": "轻度"
+    },
+    "其他症状": {
+      "score": 2,
+      "max_score": 4,
+      "percentage": 50.0,
+      "severity": "中度"
+    }
+  },
+  "recommendations": [
+    "建议尽快寻求专业心理咨询或治疗。",
+    "可以考虑心理治疗，如认知行为疗法。",
+    "保持与家人朋友的联系，寻求社会支持。"
+  ],
+  "evaluation_time": {
+    "start_time": "2025-10-15 23:01:35",
+    "duration_minutes": 8.1
+  }
+}

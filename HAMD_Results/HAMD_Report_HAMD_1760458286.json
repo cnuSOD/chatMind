@@ -1,0 +1,134 @@
+{
+  "evaluation_id": "HAMD_1760458286",
+  "total_score": 18,
+  "max_score": 64,
+  "severity_level": {
+    "level": "中度抑郁",
+    "description": "有中度抑郁症状，建议寻求专业帮助",
+    "color": "orange",
+    "score_range": "18/64"
+  },
+  "detailed_scores": {
+    "1": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到情绪低落但仍能做事，符合可进行日常活动的描述。",
+      "scoring_criteria": "明确情绪低落，但仍可进行日常活动"
+    },
+    "2": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到偶尔自责但能自我缓解，符合偶尔自责的描述。",
+      "scoring_criteria": "偶尔自责，能自我缓解"
+    },
+    "3": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户明确表示不会实施自杀行为。",
+      "scoring_criteria": "无自杀念头或行为"
+    },
+    "4": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到睡得浅醒得早，属于偶尔失眠。",
+      "scoring_criteria": "偶尔失眠，能自行恢复"
+    },
+    "5": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示吃的还可以，说明食欲正常。",
+      "scoring_criteria": "食欲正常"
+    },
+    "6": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表示有点懒得出去但仍有参与社交活动，符合偶尔兴趣减退的描述。",
+      "scoring_criteria": "偶尔兴趣减退，能维持活动"
+    },
+    "7": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示体重几乎没有变化。",
+      "scoring_criteria": "体重保持正常"
+    },
+    "8": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到做事比平时慢但未说明频繁程度，符合偶尔轻微迟缓。",
+      "scoring_criteria": "偶尔有轻微迟缓，但能自行调整"
+    },
+    "9": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到焦虑影响正常生活，符合经常感到焦虑且影响日常生活的情况。",
+      "scoring_criteria": "经常感到焦虑，影响日常生活"
+    },
+    "10": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表现出轻微自我贬低，但未影响情绪且能自我调节。",
+      "scoring_criteria": "偶尔自我贬低，但能自我调节"
+    },
+    "11": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户表示与他人有距离感且不愿意交流，符合常感情感平淡与他人疏远的表现。",
+      "scoring_criteria": "常感情感平淡，与他人疏远"
+    },
+    "12": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表示性兴趣下降，但未提及影响关系或完全丧失。",
+      "scoring_criteria": "偶尔性兴趣减退"
+    },
+    "13": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到经常感到累且没有力气，符合影响日常活动的疲劳状态。",
+      "scoring_criteria": "经常感到疲劳，影响日常活动"
+    },
+    "14": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户表示缺乏积极性，无法主动做事，需要他人推动。",
+      "scoring_criteria": "没有积极性，无法主动做事"
+    },
+    "15": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示感知能力正常。",
+      "scoring_criteria": "感知正常"
+    },
+    "16": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到偶尔出现头痛心慌，属于轻微症状。",
+      "scoring_criteria": "有轻微症状，但不影响生活"
+    }
+  },
+  "category_analysis": {
+    "核心症状": {
+      "score": 4,
+      "max_score": 12,
+      "percentage": 33.3,
+      "severity": "轻度"
+    },
+    "认知症状": {
+      "score": 1,
+      "max_score": 8,
+      "percentage": 12.5,
+      "severity": "正常"
+    },
+    "生理症状": {
+      "score": 4,
+      "max_score": 20,
+      "percentage": 20.0,
+      "severity": "正常"
+    },
+    "心理症状": {
+      "score": 8,
+      "max_score": 20,
+      "percentage": 40.0,
+      "severity": "轻度"
+    },
+    "其他症状": {
+      "score": 1,
+      "max_score": 4,
+      "percentage": 25.0,
+      "severity": "轻度"
+    }
+  },
+  "recommendations": [
+    "建议尽快寻求专业心理咨询或治疗。",
+    "可以考虑心理治疗，如认知行为疗法。",
+    "保持与家人朋友的联系，寻求社会支持。"
+  ],
+  "evaluation_time": {
+    "start_time": "2025-10-15 00:11:26",
+    "duration_minutes": 7.3
+  }
+}

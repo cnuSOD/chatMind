@@ -1096,28 +1096,31 @@ class HAMDEvaluator:
         scoring_text = "\n".join([f"{score}分: {desc}" for score, desc in current_q['scoring'].items()])
         
         # 构建提示词
-        prompt = f"""你是一个专业的心理测量智能体，任务是对用户进行哈密尔顿抑郁量表（HAMD-17）的语音问答评估。
+        prompt = f"""你是专业的心理测量评分员，只负责评分，不与用户对话。
 
-你现在正在进行第 {current_q['index']} 题：{current_q['question']}
+题目：{current_q['question']}
 
-评分参考：
+评分标准：
 {scoring_text}
 
-用户回答如下：
+用户回答：
 "{user_answer}"
 
-请根据用户的回答内容，结合评分标准，给出0-4分的评分。请分析用户回答中的关键信息，包括：
-1. 症状严重程度
-2. 频率和持续时间
-3. 对日常生活的影响程度
-4. 情感表达和用词
+严格要求：
+1) 只输出一行，格式必须是：评分：X分，理由：[简要分析]
+2) 绝对禁止提问、追问、反问
+3) 绝对禁止给建议、安慰、鼓励
+4) 绝对禁止复述用户回答
+5) 绝对禁止输出任何评分理由之外的内容
+6) 如果用户回答不清楚或无关，给0分
 
-请直接给出评分数字（0-4），然后用一句话说明评分理由。
-格式：评分：X分，理由：[简要分析]"""
+示例输出：评分：2分，理由：用户提到经常感到悲伤且失去兴趣，符合中度抑郁表现。
+
+现在请严格按照格式输出评分："""
 
         try:
             messages = [
-                {"role": "system", "content": "你是专业的心理评估专家，擅长分析和评分心理量表。"},
+                {"role": "system", "content": "你是专业的心理评估评分机器人。你只能输出格式：评分：X分，理由：[分析]。严禁输出任何其他内容。严禁提问。严禁给建议。"},
                 {"role": "user", "content": prompt}
             ]
             
@@ -1143,21 +1146,53 @@ class HAMDEvaluator:
             else:
                 return self._rule_based_scoring(user_answer), "未配置LLM，使用规则评分"
             
+            # 清洗响应：只保留"评分：X分，理由：..."这一行
+            response = response.strip()
+            lines = response.split('\n')
+            # 找到包含"评分："的第一行
+            eval_line = ""
+            for line in lines:
+                if "评分" in line and ("：" in line or ":" in line):
+                    eval_line = line.strip()
+                    break
+            
+            # 如果找不到评分行，使用原response
+            if not eval_line:
+                eval_line = response
+            
+            # 强力过滤：如果包含问号，直接丢弃整个响应，给0分
+            if "?" in eval_line or "？" in eval_line or "吗" in eval_line:
+                print(f"[警告] LLM生成了提问内容，已过滤: {eval_line}")
+                return 0, "评分：0分，理由：LLM输出格式错误（包含提问）"
+            
+            # 过滤共情/安慰性语句（我理解、你能、你愿意等）
+            empathy_patterns = [
+                r'我理解[^。]*[。，]?',
+                r'你能[^。]*[。，]?',
+                r'你愿意[^。]*[。，]?',
+                r'这些情绪[^。]*[。，]?',
+                r'比如[^。]*[。，]?',
+            ]
+            for pattern in empathy_patterns:
+                eval_line = re.sub(pattern, '', eval_line)
+            
+            eval_line = eval_line.strip()
+            
             # 解析评分
-            score_match = re.search(r'评分[：:]\s*(\d+)', response)
+            score_match = re.search(r'评分[：:]\s*(\d+)', eval_line)
             if score_match:
                 score = int(score_match.group(1))
                 score = max(0, min(4, score))  # 确保评分在0-4范围内
             else:
                 # 尝试其他格式
-                score_match = re.search(r'(\d+)分', response)
+                score_match = re.search(r'(\d+)分', eval_line)
                 if score_match:
                     score = int(score_match.group(1))
                     score = max(0, min(4, score))
                 else:
                     score = 0
                     
-            return score, response
+            return score, eval_line
             
         except Exception as e:
             print(f"LLM分析出错: {e}")
@@ -1206,7 +1241,9 @@ class HAMDEvaluator:
             return 4
     
     def process_answer(self, user_answer: str) -> Dict:
-        """处理用户回答"""
+        """处理用户回答
+        返回结构将增加 brief_ack 字段（由外部在对话层生成并播报）。
+        """
         current_q = self.get_current_question()
         if not current_q:
             return {"error": "评估已完成"}
