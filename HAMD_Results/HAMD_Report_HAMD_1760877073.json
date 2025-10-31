@@ -1,0 +1,134 @@
+{
+  "evaluation_id": "HAMD_1760877073",
+  "total_score": 28,
+  "max_score": 64,
+  "severity_level": {
+    "level": "重度抑郁",
+    "description": "有重度抑郁症状，强烈建议立即寻求专业医疗帮助",
+    "color": "red",
+    "score_range": "28/64"
+  },
+  "detailed_scores": {
+    "1": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户提到经常感到悲伤、失去兴趣和绝望，符合持续情绪低落且影响日常功能的表现。",
+      "scoring_criteria": "持续情绪低落，难以维持日常功能"
+    },
+    "6": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户表示对工作和社交失去兴趣，难以进行日常活动。",
+      "scoring_criteria": "兴趣丧失，难以进行日常活动"
+    },
+    "4": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户描述经常失眠且半夜醒来后无法入睡，符合严重失眠影响白天功能的表现。",
+      "scoring_criteria": "严重失眠，影响白天功能"
+    },
+    "8": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到做事比以前慢很多，符合经常感到迟缓，需努力才可完成活动的描述。",
+      "scoring_criteria": "经常感到迟缓，需努力才可完成活动"
+    },
+    "9": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到经常感到焦虑和烦躁且无法控制，符合经常影响日常生活的标准。",
+      "scoring_criteria": "经常感到焦虑，影响日常生活"
+    },
+    "13": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到做事积极性低需要推动，表明偶尔感到疲惫但能恢复。",
+      "scoring_criteria": "偶尔感到疲惫，但能恢复"
+    },
+    "3": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户有偶尔的自杀念头，但没有实施计划。",
+      "scoring_criteria": "偶尔有自杀念头，但没有实施计划"
+    },
+    "2": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到经常自责且认为都是自己的错，符合经常内疚、自责程度较强的描述。",
+      "scoring_criteria": "经常内疚，自责程度较强"
+    },
+    "5": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到偶尔食欲减退，能自行恢复。",
+      "scoring_criteria": "偶尔食欲减退，能自行恢复"
+    },
+    "7": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示体重没有明显变化。",
+      "scoring_criteria": "体重保持正常"
+    },
+    "10": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户表达极度自我贬低并伴有负面情绪。",
+      "scoring_criteria": "极度自我贬低，产生负面行为"
+    },
+    "11": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到与他人有距离感且不愿意交流，符合常感情感平淡与他人疏远的表现。",
+      "scoring_criteria": "常感情感平淡，与他人疏远"
+    },
+    "12": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表示性兴趣下降，但未提及频率或影响程度，符合偶尔减退标准。",
+      "scoring_criteria": "偶尔性兴趣减退"
+    },
+    "14": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户表示缺乏积极性且需要他人推动，符合无积极性、无法主动做事的表现。",
+      "scoring_criteria": "没有积极性，无法主动做事"
+    },
+    "15": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示感知能力正常。",
+      "scoring_criteria": "感知正常"
+    },
+    "16": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到偶尔出现头痛和心慌，属于轻微症状。",
+      "scoring_criteria": "有轻微症状，但不影响生活"
+    }
+  },
+  "category_analysis": {
+    "核心症状": {
+      "score": 8,
+      "max_score": 12,
+      "percentage": 66.7,
+      "severity": "中度"
+    },
+    "认知症状": {
+      "score": 3,
+      "max_score": 8,
+      "percentage": 37.5,
+      "severity": "轻度"
+    },
+    "生理症状": {
+      "score": 7,
+      "max_score": 20,
+      "percentage": 35.0,
+      "severity": "轻度"
+    },
+    "心理症状": {
+      "score": 9,
+      "max_score": 20,
+      "percentage": 45.0,
+      "severity": "轻度"
+    },
+    "其他症状": {
+      "score": 1,
+      "max_score": 4,
+      "percentage": 25.0,
+      "severity": "轻度"
+    }
+  },
+  "recommendations": [
+    "强烈建议立即寻求专业医疗帮助。",
+    "可能需要药物治疗结合心理治疗。",
+    "请不要独自承担，及时联系医生或心理健康专家。"
+  ],
+  "evaluation_time": {
+    "start_time": "2025-10-19 20:31:13",
+    "duration_minutes": 7.5
+  }
+}

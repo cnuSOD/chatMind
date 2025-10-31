@@ -1011,6 +1011,17 @@ class HAMDEvaluator:
         self.evaluation_start_time = None
         self.evaluation_id = None
         
+        # === 两阶段评估配置 ===
+        self.current_stage = 1  # 当前阶段：1=快速筛查, 2=深度评估
+        # 阶段1题目索引（按人性化顺序排列）：
+        # 1-抑郁情绪、6-兴趣丧失、4-睡眠障碍、8-精力不足、9-焦虑、13-躯体症状、3-自杀意图（放最后）
+        self.stage1_questions = [1, 6, 4, 8, 9, 13, 3]  
+        self.stage1_threshold = 7  # 阶段1转阶段2的分数阈值
+        self.stage1_completed = False  # 阶段1是否完成
+        self.waiting_stage_decision = False  # 是否正在等待用户决定是否进入阶段2
+        self.stage2_skipped = False  # 用户是否选择跳过阶段2
+        # ========================
+        
         # 确保输出目录存在
         os.makedirs(output_dir, exist_ok=True)
         
@@ -1045,6 +1056,62 @@ class HAMDEvaluator:
         except json.JSONDecodeError:
             raise ValueError(f"问题配置文件 {self.questions_file} 格式错误")
     
+    def _get_stage_questions(self, stage: int) -> List[int]:
+        """获取指定阶段的题目索引列表"""
+        if stage == 1:
+            return self.stage1_questions
+        else:  # stage == 2
+            # 阶段2：除了阶段1之外的所有题目
+            all_indices = [q['index'] for q in self.questions]
+            return [idx for idx in all_indices if idx not in self.stage1_questions]
+    
+    def get_current_stage(self) -> int:
+        """获取当前所在阶段"""
+        return self.current_stage
+    
+    def get_stage1_score(self) -> int:
+        """获取阶段1的总分"""
+        stage1_score = 0
+        for q_index in self.stage1_questions:
+            if q_index in self.scores:
+                stage1_score += self.scores[q_index]["score"]
+        return stage1_score
+    
+    def is_stage1_complete(self) -> bool:
+        """检查阶段1是否完成"""
+        # 检查阶段1的所有题目是否都已回答
+        for q_index in self.stage1_questions:
+            if q_index not in self.scores:
+                return False
+        return True
+    
+    def should_enter_stage2(self) -> bool:
+        """根据阶段1分数判断是否应该进入阶段2"""
+        return self.get_stage1_score() >= self.stage1_threshold
+    
+    def enter_stage2(self):
+        """进入阶段2深度评估"""
+        self.current_stage = 2
+        self.stage1_completed = True
+        self.waiting_stage_decision = False
+        self.stage2_skipped = False
+        print(f"[HAMD] 进入阶段2深度评估")
+    
+    def skip_stage2(self):
+        """跳过阶段2，直接结束评估"""
+        self.stage1_completed = True
+        self.stage2_skipped = True
+        self.waiting_stage_decision = False
+        print(f"[HAMD] 用户选择跳过阶段2")
+    
+    def get_stage_transition_prompt(self) -> str:
+        """获取阶段转换提示语"""
+        stage1_score = self.get_stage1_score()
+        if stage1_score >= self.stage1_threshold:
+            return f"根据快速筛查结果，您的初步评分为{stage1_score}分。为了更准确地了解您的情况，我建议进行更详细的评估。您愿意继续吗？"
+        else:
+            return f"根据快速筛查结果，您的初步评分为{stage1_score}分，表现良好。如果您愿意，我们也可以进行更全面的评估。您是否要继续？"
+    
     def start_evaluation(self) -> str:
         """开始评估，返回评估ID"""
         self.evaluation_start_time = time.time()
@@ -1053,16 +1120,44 @@ class HAMDEvaluator:
         self.scores = {}
         self.detailed_answers = {}
         
+        # 重置阶段相关状态
+        self.current_stage = 1
+        self.stage1_completed = False
+        self.waiting_stage_decision = False
+        self.stage2_skipped = False
+        
         # 控制台保留简要日志
-        print(f"[HAMD] Start, ID={self.evaluation_id}, Time={time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.evaluation_start_time))}")
+        print(f"[HAMD] Start, ID={self.evaluation_id}, Time={time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.evaluation_start_time))}, Stage=1")
         
         return self.evaluation_id
     
     def get_current_question(self) -> Optional[Dict]:
-        """获取当前问题"""
-        if self.current_question_index >= len(self.questions):
+        """获取当前问题（支持两阶段逻辑）"""
+        # 如果正在等待阶段决策，返回None（由外部处理阶段转换提示）
+        if self.waiting_stage_decision:
             return None
-        return self.questions[self.current_question_index]
+        
+        # 获取当前阶段的题目列表
+        current_stage_questions = self._get_stage_questions(self.current_stage)
+        
+        # 如果当前阶段的题目都已完成
+        if self.current_question_index >= len(current_stage_questions):
+            # 如果是阶段1完成，设置等待决策标志
+            if self.current_stage == 1 and not self.stage1_completed:
+                self.waiting_stage_decision = True
+                self.stage1_completed = True
+                return None
+            # 如果是阶段2完成或阶段2被跳过，返回None表示评估结束
+            return None
+        
+        # 根据索引获取问题
+        question_index = current_stage_questions[self.current_question_index]
+        # 从所有问题中找到对应的问题对象
+        for q in self.questions:
+            if q['index'] == question_index:
+                return q
+        
+        return None
     
     def get_question_prompt(self) -> str:
         """生成当前问题的提问内容（不包含 i/n 进度文案）"""
@@ -1070,19 +1165,8 @@ class HAMDEvaluator:
         if not current_q:
             return ""
         
-        # 多样化问法：随机挑选更自然的提示
-        variants = [
-            f"{current_q['question']}",
-            f"想了解一下：{current_q['question']}",
-            f"可以聊聊：{current_q['question']}",
-            f"这方面的情况是：{current_q['question']}"
-        ]
-        try:
-            import random as _random
-            chosen = _random.choice(variants)
-        except Exception:
-            chosen = variants[0]
-        prompt = chosen + "\n请结合最近一周的感受简单说说。"
+        # 直接使用问题，不添加任何前缀
+        prompt = f"{current_q['question']}\n请结合最近一周的感受简单说说。"
         
         return prompt
     
@@ -1241,8 +1325,8 @@ class HAMDEvaluator:
             return 4
     
     def process_answer(self, user_answer: str) -> Dict:
-        """处理用户回答
-        返回结构将增加 brief_ack 字段（由外部在对话层生成并播报）。
+        """处理用户回答（支持两阶段逻辑）
+        返回结构增加 stage_transition_needed 和 is_complete 字段
         """
         current_q = self.get_current_question()
         if not current_q:
@@ -1280,11 +1364,26 @@ class HAMDEvaluator:
         # 移动到下一题
         self.current_question_index += 1
         
+        # 检查是否需要阶段转换
+        stage_transition_needed = False
+        current_stage_questions = self._get_stage_questions(self.current_stage)
+        
+        if self.current_question_index >= len(current_stage_questions):
+            if self.current_stage == 1:
+                # 阶段1完成，需要进行阶段转换决策
+                stage_transition_needed = True
+                self.waiting_stage_decision = True
+                self.stage1_completed = True
+        
+        # 判断评估是否完全结束
+        is_complete = self.is_evaluation_complete()
+        
         return {
             "question_id": question_id,
             "score": score,
             "analysis": analysis,
-            "is_complete": self.current_question_index >= len(self.questions)
+            "stage_transition_needed": stage_transition_needed,
+            "is_complete": is_complete
         }
     
     def generate_report(self) -> Dict:
@@ -1445,8 +1544,26 @@ class HAMDEvaluator:
         }
     
     def is_evaluation_complete(self) -> bool:
-        """检查评估是否完成"""
-        return self.current_question_index >= len(self.questions)
+        """检查评估是否完成（支持两阶段逻辑）"""
+        # 如果正在等待阶段决策，评估未完成
+        if self.waiting_stage_decision:
+            return False
+        
+        # 如果阶段2被跳过，评估完成
+        if self.stage2_skipped:
+            return True
+        
+        # 如果在阶段1，检查阶段1是否完成
+        if self.current_stage == 1:
+            current_stage_questions = self._get_stage_questions(1)
+            return self.current_question_index >= len(current_stage_questions)
+        
+        # 如果在阶段2，检查阶段2是否完成
+        if self.current_stage == 2:
+            current_stage_questions = self._get_stage_questions(2)
+            return self.current_question_index >= len(current_stage_questions)
+        
+        return False
     
     def previous_question(self) -> bool:
         """回到上一题，并撤销上一题已记录的答案与评分。"""
@@ -1489,12 +1606,19 @@ class HAMDEvaluator:
         return True
 
     def reset_evaluation(self):
-        """重置评估"""
+        """重置评估（包括阶段状态）"""
         self.current_question_index = 0
         self.scores = {}
         self.detailed_answers = {}
         self.evaluation_start_time = None
         self.evaluation_id = None
+        
+        # 重置阶段相关状态
+        self.current_stage = 1
+        self.stage1_completed = False
+        self.waiting_stage_decision = False
+        self.stage2_skipped = False
+        
         print("评估已重置")
 
 

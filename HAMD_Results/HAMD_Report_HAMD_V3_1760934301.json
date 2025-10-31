@@ -1,0 +1,153 @@
+{
+  "evaluation_id": "HAMD_V3_1760934301",
+  "version": "V3 (三阶段智能评估)",
+  "total_score": 17,
+  "max_score": 64,
+  "severity_level": {
+    "level": "轻度抑郁",
+    "description": "有轻度抑郁症状，建议关注心理健康",
+    "color": "yellow",
+    "score_range": "17/64"
+  },
+  "detailed_scores": {
+    "1": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到经常感到悲伤且对事物失去兴趣，符合明确情绪低落但仍可进行日常活动的描述。",
+      "scoring_criteria": "明确情绪低落，但仍可进行日常活动"
+    },
+    "6": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户表示“不太感兴趣了”，结合上下文提到“对很多事情都失去了兴趣”，符合兴趣丧失难以进行日常活动的描述。",
+      "scoring_criteria": "兴趣丧失，难以进行日常活动"
+    },
+    "4": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到经常失眠，符合经常失眠需要采取措施的标准。",
+      "scoring_criteria": "经常失眠，需要采取措施"
+    },
+    "9": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到“有时候会焦虑但不严重”，符合偶尔感到紧张或不安的描述。",
+      "scoring_criteria": "偶尔感到紧张或不安"
+    },
+    "13": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表示做事变慢但还能完成，符合偶尔感到疲惫但能恢复的描述。",
+      "scoring_criteria": "偶尔感到疲惫，但能恢复"
+    },
+    "3": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户明确表示没有自杀念头或行为。",
+      "scoring_criteria": "无自杀念头或行为"
+    },
+    "2": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户表示偶尔会感到自己做错了什么，但能自我缓解。",
+      "scoring_criteria": "偶尔自责，能自我缓解"
+    },
+    "8": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到比以前慢一些但还能完成，符合偶尔有轻微迟缓但能自行调整的描述。",
+      "scoring_criteria": "偶尔有轻微迟缓，但能自行调整"
+    },
+    "10": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户偶尔自我贬低，但未表现出明显情绪影响或行为改变。",
+      "scoring_criteria": "偶尔自我贬低，但能自我调节"
+    },
+    "5": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示食欲正常。",
+      "scoring_criteria": "食欲正常"
+    },
+    "11": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户回答未体现情感冷漠或与他人疏远的表现。",
+      "scoring_criteria": "情感正常，与他人关系良好"
+    },
+    "7": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户表示体重没有明显变化，符合体重保持正常的标准。",
+      "scoring_criteria": "体重保持正常"
+    },
+    "14": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户回答简短且缺乏主动性，表现出无积极性的状态。",
+      "scoring_criteria": "没有积极性，无法主动做事"
+    },
+    "12": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户回答“嗯不太有了”暗示性兴趣有所减退，但未提及影响关系或抑郁症状。",
+      "scoring_criteria": "偶尔性兴趣减退"
+    },
+    "15": {
+      "score": 0,
+      "analysis": "评分：0分，理由：用户回答与问题无关，但未表现出感知异常。",
+      "scoring_criteria": "感知正常"
+    },
+    "16": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到有焦虑和晕的症状，属于轻微症状但未说明影响生活。",
+      "scoring_criteria": "有轻微症状，但不影响生活"
+    }
+  },
+  "category_analysis": {
+    "核心症状": {
+      "score": 6,
+      "max_score": 12,
+      "percentage": 50.0,
+      "severity": "中度"
+    },
+    "认知症状": {
+      "score": 1,
+      "max_score": 8,
+      "percentage": 12.5,
+      "severity": "正常"
+    },
+    "生理症状": {
+      "score": 4,
+      "max_score": 20,
+      "percentage": 20.0,
+      "severity": "正常"
+    },
+    "心理症状": {
+      "score": 5,
+      "max_score": 20,
+      "percentage": 25.0,
+      "severity": "轻度"
+    },
+    "其他症状": {
+      "score": 1,
+      "max_score": 4,
+      "percentage": 25.0,
+      "severity": "轻度"
+    }
+  },
+  "recommendations": [
+    "建议关注自己的心理健康状态。",
+    "可以尝试放松技巧，如深呼吸、冥想或适度运动。",
+    "如果症状持续，建议咨询心理健康专业人士。"
+  ],
+  "emotion_analysis": {
+    "average_intensity": 3.67,
+    "dominant_emotion": "neutral",
+    "emotion_distribution": {
+      "negative": 8,
+      "neutral": 13
+    }
+  },
+  "risk_assessment": {
+    "suicide_risk_score": 0,
+    "overall_risk_level": "high",
+    "high_risk_detected": false
+  },
+  "stages_completed": {
+    "stage_1": true,
+    "stage_2": true,
+    "stage_3": false
+  },
+  "evaluation_time": {
+    "start_time": "2025-10-20 12:25:01",
+    "duration_minutes": 6.9
+  }
+}

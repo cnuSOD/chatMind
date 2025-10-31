@@ -1,0 +1,98 @@
+{
+  "evaluation_id": "HAMD_V3_1760932214",
+  "version": "V3 (三阶段智能评估)",
+  "total_score": 8,
+  "max_score": 64,
+  "severity_level": {
+    "level": "轻度抑郁",
+    "description": "有轻度抑郁症状，建议关注心理健康",
+    "color": "yellow",
+    "score_range": "8/64"
+  },
+  "detailed_scores": {
+    "1": {
+      "score": 3,
+      "analysis": "评分：3分，理由：用户提到心情不好、经常感到悲伤且对事物失去兴趣，符合持续情绪低落难以维持日常功能的表现。",
+      "scoring_criteria": "持续情绪低落，难以维持日常功能"
+    },
+    "6": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到对运动失去兴趣，但未说明是否影响其他日常活动，符合偶尔兴趣减退。",
+      "scoring_criteria": "偶尔兴趣减退，能维持活动"
+    },
+    "4": {
+      "score": 2,
+      "analysis": "评分：2分，理由：用户提到经常失眠，符合经常失眠需要采取措施的标准。",
+      "scoring_criteria": "经常失眠，需要采取措施"
+    },
+    "9": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到有时会焦虑但不严重，符合偶尔感到紧张或不安的描述。",
+      "scoring_criteria": "偶尔感到紧张或不安"
+    },
+    "13": {
+      "score": 1,
+      "analysis": "评分：1分，理由：用户提到有时特别累，但未说明影响日常活动，符合偶尔疲惫能恢复的情况。",
+      "scoring_criteria": "偶尔感到疲惫，但能恢复"
+    }
+  },
+  "category_analysis": {
+    "核心症状": {
+      "score": 4,
+      "max_score": 12,
+      "percentage": 33.3,
+      "severity": "轻度"
+    },
+    "认知症状": {
+      "score": 0,
+      "max_score": 8,
+      "percentage": 0.0,
+      "severity": "正常"
+    },
+    "生理症状": {
+      "score": 3,
+      "max_score": 20,
+      "percentage": 15.0,
+      "severity": "正常"
+    },
+    "心理症状": {
+      "score": 1,
+      "max_score": 20,
+      "percentage": 5.0,
+      "severity": "正常"
+    },
+    "其他症状": {
+      "score": 0,
+      "max_score": 4,
+      "percentage": 0.0,
+      "severity": "正常"
+    }
+  },
+  "recommendations": [
+    "建议关注自己的心理健康状态。",
+    "可以尝试放松技巧，如深呼吸、冥想或适度运动。",
+    "如果症状持续，建议咨询心理健康专业人士。"
+  ],
+  "emotion_analysis": {
+    "average_intensity": 4.86,
+    "dominant_emotion": "negative",
+    "emotion_distribution": {
+      "negative": 5,
+      "neutral": 2
+    }
+  },
+  "risk_assessment": {
+    "suicide_risk_score": 0,
+    "overall_risk_level": "medium",
+    "high_risk_detected": false
+  },
+  "stages_completed": {
+    "stage_1": true,
+    "stage_2": false,
+    "stage_3": false
+  },
+  "evaluation_time": {
+    "start_time": "2025-10-20 11:50:14",
+    "duration_minutes": 2.9
+  }
+}
