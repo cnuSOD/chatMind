@@ -1,0 +1,40 @@
+{
+  "llm": {
+    "model": "qwen-turbo",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "tts": {
+    "voice": "zh-CN-XiaoyiNeural"
+  },
+  "asr": {
+    "model_dir": "iic/SenseVoiceSmall"
+  },
+  "audio": {
+    "answer_pause_seconds": 3.5,
+    "no_speech_threshold": 1.0,
+    "min_answer_length": 3,
+    "vad_mode": 3
+  },
+  "assessment": {
+    "stage_thresholds": {"1": 5, "2": 10},
+    "max_follow_up": 2
+  },
+  "safety": {
+    "crisis_hotline": "12356",
+    "crisis_keywords": ["想死", "自杀", "自残", "不想活", "活着没意思", "活不下去", "了结", "解脱", "伤害自己"]
+  },
+  "privacy": {
+    "delete_audio_after_use": true,
+    "delete_tts_after_play": true
+  },
+  "persona": {
+    "assistant_name": "小知"
+  },
+  "paths": {
+    "output_dir": "./output",
+    "tts_dir": "./output/tts",
+    "report_dir": "./HAMD_Results/",
+    "log_dir": "./logs",
+    "questions_file": "hamd_questions_v3.json"
+  }
+}
